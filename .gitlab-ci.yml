@@ -76,5 +76,5 @@ build-backend:
 build-frontend:
   stage: buildandpush
   script:
-    - docker build -f Dockerfile.api -t $FRONTEND_IMAGE.
+    - docker build -f Dockerfile.frontend -t $FRONTEND_IMAGE.
     - echo "Frontend image built."
