@@ -69,7 +69,7 @@ before_script:
 build-backend:
   stage: buildandpush
   script:
-    - docker build -f Dockerfile.api -t $BACKEND_IMAGE .
+    - docker build -f Dockerfile.api -t $BACKEND_IMAGE $CI_PROJECT_DIR
     - echo "Backend image built."
     - docker push $BACKEND_IMAGE
     - echo "Backend image pushed."
@@ -78,7 +78,7 @@ build-backend:
 build-frontend:
   stage: buildandpush
   script:
-    - docker build -f Dockerfile.frontend -t $FRONTEND_IMAGE .
+    - docker build -f Dockerfile.frontend -t $FRONTEND_IMAGE $CI_PROJECT_DIR
     - echo "Frontend image built."
     - docker push $FRONTEND_IMAGE
     - echo "Frontend image pushed."
