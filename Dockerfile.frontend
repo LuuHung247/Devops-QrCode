@@ -1,0 +1,39 @@
+##### Dockerfile.frontend #####
+FROM node:20.19-alpine AS base
+
+# Dependencies stage
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Copy package.json và lock files từ thư mục front-end-nextjs
+COPY front-end-nextjs/package.json front-end-nextjs/yarn.lock* front-end-nextjs/package-lock.json* front-end-nextjs/pnpm-lock.yaml* ./
+RUN npm install --production
+
+# Build stage
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY front-end-nextjs/. .
+RUN npm run build
+
+# Runner stage
+FROM node:20.19-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+RUN addgroup --system --gid 1001 nodejs \
+    && adduser --system --uid 1001 nextjs
+
+# Copy built app
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+USER nextjs
+EXPOSE 3000
+
+CMD ["node", "server.js"]
