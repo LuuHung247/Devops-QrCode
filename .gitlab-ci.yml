@@ -3,7 +3,7 @@ stages:
   - test
 
 before_script:
-  - cd backend
+  - cd api
   - python --version
   - pip install --upgrade pip
 
