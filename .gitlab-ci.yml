@@ -55,8 +55,8 @@
 stages:
   - buildandpush
 variables:
-  BACKEND_IMAGE: ${REGISTRY_URL}/e-com/fastapi-backend:latest
-  FRONTEND_IMAGE: ${REGISTRY_URL}/e-com/nextjs-frontend:latest
+  BACKEND_IMAGE: ${REGISTRY_URL}/${REGISTRY_PROJECT}/fastapi-backend:latest
+  FRONTEND_IMAGE: ${REGISTRY_URL}/${REGISTRY_PROJECT}/nextjs-frontend:latest
 
 image: docker:28.2.2
 services:
