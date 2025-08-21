@@ -1,50 +1,80 @@
-stages:
-  - build
-  - test
 
+### Without Docker
+# stages:
+#   - build
+#   - test
+
+# variables:
+#   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+# before_script:
+#   - cd api
+#   - python --version
+#   - pip install --upgrade pip
+
+# cache:
+#   key: ${CI_COMMIT_REF_SLUG}
+#   paths:
+#     - .cache/pip
+
+# build-backend:
+#   stage: build
+#   image: python:3.12
+#   script:
+#     - pip install -r requirements.txt
+#     - echo "Backend build complete."
+
+# test-backend:
+#   stage: test
+#   image: python:3.12
+#   script:
+#     - pip install -r requirements.txt
+#     - pip install pytest
+#     - pytest -v
+
+# build-frontend:
+#   stage: build
+#   image: node:20.19
+#   before_script:
+#     - cd front-end-nextjs
+#     - npm ci
+#   script:
+#     - npm run build
+#     - echo "Frontend build complete."
+
+# lint-frontend:
+#   stage: test
+#   image: node:20.19
+#   before_script:
+#     - cd front-end-nextjs
+#     - npm ci
+#   script:
+#     - npm run lint    
+
+### With Docker
+stages:
+  - buildandpush
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  BACKEND_IMAGE: ${REGISTRY_URL}/e-com/fastapi-backend:latest
+  FRONTEND_IMAGE: ${REGISTRY_URL}/e-com/nextjs-frontend:latest
+
+image: docker:28.2.2
+services:
+  - docker:28.2.2-dind
 
 before_script:
-  - cd api
-  - python --version
-  - pip install --upgrade pip
-
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - .cache/pip
+  # Login Harbor
+  - docker login ${REGISTRY_URL} -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD} 
 
 build-backend:
-  stage: build
-  image: python:3.12
+  stage: buildandpush
   script:
-    - pip install -r requirements.txt
-    - echo "Backend build complete."
+    - docker build -f Dockerfile.api -t $BACKEND_IMAGE .
+    - echo "Backend image built."
 
-test-backend:
-  stage: test
-  image: python:3.12
-  script:
-    - pip install -r requirements.txt
-    - pip install pytest
-    - pytest -v
 
 build-frontend:
-  stage: build
-  image: node:20.19
-  before_script:
-    - cd front-end-nextjs
-    - npm ci
+  stage: buildandpush
   script:
-    - npm run build
-    - echo "Frontend build complete."
-
-lint-frontend:
-  stage: test
-  image: node:20.19
-  before_script:
-    - cd front-end-nextjs
-    - npm ci
-  script:
-    - npm run lint    
+    - docker build -f Dockerfile.api -t $FRONTEND_IMAGE.
+    - echo "Frontend image built."
