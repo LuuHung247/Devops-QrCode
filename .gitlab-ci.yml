@@ -1,22 +1,23 @@
 stages:
   - build
   - test
-  - deploy
 
-build:
+before_script:
+  - cd backend
+  - python --version
+  - pip install --upgrade pip
+
+build-backend:
   stage: build
+  image: python:3.12
   script:
-    - echo "Building project..."
-    - echo "Bulding Done!"
+    - pip install -r requirements.txt
+    - echo "Backend build complete."
 
-test:
+test-backend:
   stage: test
+  image: python:3.12
   script:
-    - echo "Running tests..."
-    - echo "All tests passed!"
-
-deploy:
-  stage: deploy
-  script:
-    - echo "Deploying..."
-    - echo "Deployment complete!"
+    - pip install -r requirements.txt
+    - pip install pytest
+    - pytest -v
