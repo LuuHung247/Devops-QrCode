@@ -1,12 +1,14 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, HttpUrl
 import qrcode
 import boto3
 import os
 from io import BytesIO
 import hashlib
-# Loading Environment variable (AWS Access Key and Secret Key)
 from dotenv import load_dotenv
+
+# Load environment variables
 load_dotenv()
 
 app = FastAPI()
@@ -26,13 +28,20 @@ app.add_middleware(
 # AWS S3 Configuration
 s3 = boto3.client(
     's3',
-    aws_access_key_id= os.getenv("AWS_ACCESS_KEY"),
-    aws_secret_access_key= os.getenv("AWS_SECRET_KEY"))
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_KEY")
+)
 
-bucket_name = 'devops-qrcode' # Add your bucket name here
+bucket_name = 'devops-qrcode'  # Update with your bucket name
+
+# Pydantic model for request body
+class QRRequest(BaseModel):
+    url: HttpUrl  # Automatically validates if the string is a valid URL
 
 @app.post("/generate-qr/")
-async def generate_qr(url: str):
+async def generate_qr(data: QRRequest):
+    url = str(data.url)
+
     # Generate QR Code
     qr = qrcode.QRCode(
         version=1,
@@ -44,7 +53,7 @@ async def generate_qr(url: str):
     qr.make(fit=True)
 
     img = qr.make_image(fill_color="black", back_color="white")
-    
+
     # Save QR Code to BytesIO object
     img_byte_arr = BytesIO()
     img.save(img_byte_arr, format='PNG')
@@ -53,17 +62,21 @@ async def generate_qr(url: str):
     # Generate file name for S3
     url_hash = hashlib.md5(url.encode()).hexdigest()
     file_name = f"{url_hash}.png"
-  
 
     try:
         # Upload to S3
-        s3.put_object(Bucket=bucket_name, Key=file_name, Body=img_byte_arr, ContentType='image/png', ACL='public-read')
-        
+        s3.put_object(
+            Bucket=bucket_name,
+            Key=file_name,
+            Body=img_byte_arr,
+            ContentType='image/png',
+            ACL='public-read'
+        )
+
         # Generate the S3 URL
         s3_url = f"https://{bucket_name}.s3.amazonaws.com/{file_name}"
         return {"qr_code_url": s3_url}
-    except Exception as e:
-            print("S3 Upload Error:", e)
-            raise HTTPException(status_code=500, detail=str(e))
 
-    
+    except Exception as e:
+        print("S3 Upload Error:", e)
+        raise HTTPException(status_code=500, detail=str(e))
