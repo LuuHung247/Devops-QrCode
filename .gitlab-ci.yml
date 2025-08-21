@@ -7,7 +7,7 @@ build:
   stage: build
   script:
     - echo "Building project..."
-    - echo "Done!"
+    - echo "Bulding Done!"
 
 test:
   stage: test
