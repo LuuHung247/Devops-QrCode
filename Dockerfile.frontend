@@ -8,7 +8,7 @@ WORKDIR /app
 
 # Copy package.json và lock files từ thư mục front-end-nextjs
 COPY front-end-nextjs/package.json front-end-nextjs/yarn.lock* front-end-nextjs/package-lock.json* front-end-nextjs/pnpm-lock.yaml* ./
-RUN npm install --production
+RUN npm install 
 
 # Build stage
 FROM base AS builder
