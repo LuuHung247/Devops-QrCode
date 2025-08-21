@@ -29,3 +29,22 @@ test-backend:
     - pip install -r requirements.txt
     - pip install pytest
     - pytest -v
+
+build-frontend:
+  stage: build
+  image: node:20.19
+  before_script:
+    - cd front-end-nextjs
+    - npm ci
+  script:
+    - npm run build
+    - echo "Frontend build complete."
+
+lint-frontend:
+  stage: test
+  image: node:20.19
+  before_script:
+    - cd front-end-nextjs
+    - npm ci
+  script:
+    - npm run lint    
