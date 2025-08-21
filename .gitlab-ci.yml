@@ -71,6 +71,8 @@ build-backend:
   script:
     - docker build -f Dockerfile.api -t $BACKEND_IMAGE .
     - echo "Backend image built."
+    - docker push $BACKEND_IMAGE
+    - echo "Backend image pushed."
 
 
 build-frontend:
@@ -78,3 +80,6 @@ build-frontend:
   script:
     - docker build -f Dockerfile.frontend -t $FRONTEND_IMAGE .
     - echo "Frontend image built."
+    - docker push $FRONTEND_IMAGE
+    - echo "Frontend image pushed."
+    
